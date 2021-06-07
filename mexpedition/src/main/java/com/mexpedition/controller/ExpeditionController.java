@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mexpedition.dao.ExpeditionRepository;
+import com.mexpedition.exeptions.CreateExpeditionExistanteException;
 import com.mexpedition.exeptions.ExpeditionInexistanteException;
 import com.mexpedition.exeptions.ImpossibleAjouterExpeditionException;
 import com.mexpedition.model.Expedition;
@@ -23,8 +24,12 @@ public class ExpeditionController {
 	@Autowired
 	private ExpeditionRepository expeditionRepository;
 	
-	@PostMapping("/expeditions")
+	@PostMapping("/Expeditions")
 	public ResponseEntity<Expedition> ajouterExpedition(@RequestBody Expedition exp){
+		Optional<Expedition> existingExpedition = expeditionRepository.findById(exp.getId());
+		if(existingExpedition.isPresent()) {
+			throw new CreateExpeditionExistanteException("Cette expedition existe déjà.");
+		}
 		Expedition nouvelleCommande = expeditionRepository.save(exp);
 
 	    if(nouvelleCommande == null) throw new ImpossibleAjouterExpeditionException("Impossible d'ajouter cette expedition");
@@ -32,10 +37,10 @@ public class ExpeditionController {
 	    return new ResponseEntity<Expedition>(exp, HttpStatus.CREATED);
 	}
 
-	@PutMapping("/expeditions")
+	@PutMapping("/Expeditions")
 	public ResponseEntity<Expedition> majExpedition(@RequestBody Expedition exp){
 		Optional<Expedition> existingExpedition = expeditionRepository.findById(exp.getId());
-		if(existingExpedition.isEmpty()) {
+		if(!existingExpedition.isPresent()) {
 			throw new ExpeditionInexistanteException("Cette expedition n'existe pas.");
 		}
 		Expedition nouvelleCommande = expeditionRepository.save(exp);
@@ -47,10 +52,10 @@ public class ExpeditionController {
 	    return new ResponseEntity<Expedition>(exp, HttpStatus.OK);
 	}
 
-	@GetMapping("/expeditions/{id}")
+	@GetMapping("/Expeditions/{id}")
 	public Expedition reccupererExpeditionParId(@PathVariable int id) {
 		Optional<Expedition> existingExpedition = expeditionRepository.findById(id);
-		if(existingExpedition.isEmpty()) {
+		if(!existingExpedition.isPresent()) {
 			throw new ExpeditionInexistanteException("Cette expedition n'existe pas.");
 		}
 	    return existingExpedition.get();

@@ -15,7 +15,7 @@ public class Expedition {
 	@GeneratedValue
 	private int id;
 	
-	private int indCommande;
+	private int idCommande;
 	
 	private int etat;
 }
